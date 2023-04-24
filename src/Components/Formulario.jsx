@@ -18,7 +18,7 @@ const Formulario = () => {
   const pregunta = useLoaderData();
   const camara = useRef();
   const reproduccion = useRef();
-
+  
   const recordedBlobs = useRef(null);
   const mediaRecorder = useRef(null);
   //*agregarRespuesta solo es para pasar si es que no lleno
@@ -99,13 +99,16 @@ const Formulario = () => {
   }, [grabar]);
   
   const playButton = () => {
+    stopCamera();
     const mimeType = 'video/webm'
     const superBuffer = new Blob(recordedBlobs.current, { type: mimeType });
-    reproduccion.current.src = null;
-    reproduccion.current.srcObject = null;
-    reproduccion.current.src = window.URL.createObjectURL(superBuffer);
-    reproduccion.current.controls = true;
-    reproduccion.current.play();
+    camara.current.src = null;
+    camara.current.srcObject = null;
+    
+    camara.current.src = window.URL.createObjectURL(superBuffer);
+    camara.current.controls = true;
+    camara.current.play();
+    
   }
   const recordButton = (e) => {
     setGrabar(!grabar);
@@ -183,7 +186,7 @@ const Formulario = () => {
     }
   }
   const startCamera = async (e) => {
-    e.target.disabled = true;
+    // e.target.disabled = true;
     setResponder(!responder);
     console.log("Using media constraints:", constraints);
     await init(constraints);
