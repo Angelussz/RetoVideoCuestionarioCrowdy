@@ -18,7 +18,7 @@ const Formulario = () => {
   const pregunta = useLoaderData();
   const camara = useRef();
   const reproduccion = useRef();
-  
+
   const recordedBlobs = useRef(null);
   const mediaRecorder = useRef(null);
   //*agregarRespuesta solo es para pasar si es que no lleno
@@ -32,6 +32,7 @@ const Formulario = () => {
         pregunta.terminado = true;
       }
     });
+    
   };
   //?Debo terminar esta funcion
   const linkDelante = () => {
@@ -97,19 +98,22 @@ const Formulario = () => {
       }
     }
   }, [grabar]);
-  
+  useEffect(() => {
+    agregarRespuesta(preguntas,pregunta.numeroPregunta);
+  }, [respuesta]);
+
   const playButton = () => {
     stopCamera();
-    const mimeType = 'video/webm'
-    const superBuffer = new Blob(recordedBlobs.current, { type: mimeType });
+    const mimeType = "video/webm";
+    // const superBuffer = new Blob(recordedBlobs.current, { type: mimeType });
     camara.current.src = null;
     camara.current.srcObject = null;
-    
-    camara.current.src = window.URL.createObjectURL(superBuffer);
+
+    // camara.current.src = window.URL.createObjectURL(superBuffer);
+    camara.current.src = pregunta.respuesta;
     camara.current.controls = true;
     camara.current.play();
-    
-  }
+  };
   const recordButton = (e) => {
     setGrabar(!grabar);
     // if (responder === "Start Recording") {
@@ -155,6 +159,8 @@ const Formulario = () => {
     // downloadButton.disabled = true;
     // codecPreferences.disabled = true;
     mediaRecorder.current.onstop = (event) => {
+      const superBuffer = new Blob(recordedBlobs.current, { type: mimeType });
+      setRespuesta(window.URL.createObjectURL(superBuffer));
       console.log("Recorder stopped: ", event);
       console.log("Recorded Blobs: ", recordedBlobs);
     };
@@ -164,6 +170,7 @@ const Formulario = () => {
   }
 
   function stopRecording() {
+   
     mediaRecorder.current.stop();
   }
 
@@ -205,6 +212,7 @@ const Formulario = () => {
   };
 
   //--termina video
+  console.log(respuesta);
   if (!pregunta) {
     return <div>No existe ese numero de pregunta</div>;
   }
