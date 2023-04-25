@@ -14,17 +14,14 @@ export const loader = ({ params }) => {
 const Formulario = () => {
   const [respuesta, setRespuesta] = useState("");
   const [responder, setResponder] = useState(false);
-  
+  const [cambioVista, setCambioVista] = useState(true);
   const [grabar, setGrabar] = useState(false);
   const pregunta = useLoaderData();
-  const refo= useParams(); // Referencia actual
+  const refo = useParams(); // Referencia actual
   console.log(refo.pregunta);
   const camara = useRef();
   const reproduccion = useRef();
-  
-  const siguiente =useRef();
-  const anterior = useRef();
-
+  const videoDeCamara = useRef();
   const recordedBlobs = useRef(null);
   const mediaRecorder = useRef(null);
   //*agregarRespuesta solo es para pasar si es que no lleno
@@ -38,7 +35,6 @@ const Formulario = () => {
         pregunta.terminado = true;
       }
     });
-    
   };
   //?Debo terminar esta funcion
   const linkDelante = () => {
@@ -81,8 +77,8 @@ const Formulario = () => {
       }
     }
   };
-  const [sgte,setSgte] = useState(linkDelante());
-  const [atras,setAtras] = useState(linkAtras());
+  const [sgte, setSgte] = useState(linkDelante());
+  const [atras, setAtras] = useState(linkAtras());
   //Camara
 
   const constraints = {
@@ -107,21 +103,18 @@ const Formulario = () => {
     }
   }, [grabar]);
   useEffect(() => {
-    agregarRespuesta(preguntas,pregunta.numeroPregunta);
-    
-    setSgte(linkDelante())
-    setAtras(linkAtras())
-    
+    agregarRespuesta(preguntas, pregunta.numeroPregunta);
+
+    setSgte(linkDelante());
+    setAtras(linkAtras());
   }, [respuesta]);
-  
+
   useEffect(() => {
-    stopCamera()
-    
-  }, [refo.pregunta])
-  
-  
+    setCambioVista(true);
+  }, [refo.pregunta]);
+
   const playButton = () => {
-    stopCamera();
+    setCambioVista(false)
     const mimeType = "video/webm";
     // const superBuffer = new Blob(recordedBlobs.current, { type: mimeType });
     camara.current.src = null;
@@ -131,10 +124,10 @@ const Formulario = () => {
     camara.current.src = pregunta.respuesta;
     camara.current.controls = true;
     camara.current.play();
-    
   };
   const recordButton = (e) => {
     setGrabar(!grabar);
+    setCambioVista(true)
     // if (responder === "Start Recording") {
     //   startRecording();
     // } else {
@@ -182,7 +175,6 @@ const Formulario = () => {
       setRespuesta(window.URL.createObjectURL(superBuffer));
       console.log("Recorder stopped: ", event);
       console.log("Recorded Blobs: ", recordedBlobs);
-      
     };
     mediaRecorder.current.ondataavailable = handleDataAvailable;
     mediaRecorder.current.start();
@@ -190,7 +182,6 @@ const Formulario = () => {
   }
 
   function stopRecording() {
-   
     mediaRecorder.current.stop();
   }
 
@@ -212,9 +203,9 @@ const Formulario = () => {
       errorMsgElement.innerHTML = `navigator.getUserMedia error:${e.toString()}`;
     }
   }
-  const startCamera = async (e) => {
+  const startCamera = async () => {
     // e.target.disabled = true;
-    setResponder(!responder);
+    // setResponder(!responder);
     console.log("Using media constraints:", constraints);
     await init(constraints);
   };
@@ -226,13 +217,13 @@ const Formulario = () => {
       const tracks = mediaStream.getTracks();
       tracks.forEach((track) => track.stop());
 
-      camara.current.srcObject = null;
+      // camara.current.srcObject = null;
     }
     // const mediaStream = camara.current.srcObject;
   };
 
   //--termina video
-  
+  startCamera();
   // if (!pregunta) {
   //   return <div>No existe ese numero de pregunta</div>;
   // }
@@ -240,32 +231,24 @@ const Formulario = () => {
     <div>
       <h1>Pregunta {pregunta.numeroPregunta}</h1>
       <p>{pregunta.pregunta}</p>
-      <Link to={"/"}>Volver</Link>
+      <Link to={"/"} onClick={()=>{
+        stopCamera()
+      }}>Volver</Link>
       {/* !checar aca  */}
+      {cambioVista?
       <video ref={camara} autoPlay playsInline></video>
-      <button onClick={startCamera}>Responder</button>
+      :
+      <video ref={videoDeCamara} playsInline></video>
+    }
       <video ref={reproduccion} playsInline></video>
-      {responder && (
-        <button onClick={recordButton}>
-          {grabar ? "Parar Grabacion" : "Grabar"}{" "}
-        </button>
-      )}
-      {pregunta.respuesta?<button onClick={playButton}>Play</button>:""}
-      <Link
-        to={`/preguntas/${atras}`}
-        
-      >
-        Pregunta Anterior
-      </Link>
-      <Link
-        to={`/preguntas/${sgte}`}
-        
-        
-      >
-        Siguiente Pregunta
-      </Link>
-      <p>siguiente{sgte}</p>
-      <p>atras{atras}</p>
+
+      <button onClick={recordButton}>
+        {grabar ? "Parar Grabacion" : "Grabar"}{" "}
+      </button>
+
+      {pregunta.respuesta ? <button onClick={playButton}>Play</button> : ""}
+      <Link to={`/preguntas/${atras}`}>Pregunta Anterior</Link>
+      <Link to={`/preguntas/${sgte}`}>Siguiente Pregunta</Link>
     </div>
   );
 };
