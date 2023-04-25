@@ -107,3 +107,42 @@ navigator.mediaDevices.getUserMedia({ video: true, audio: true })
   .catch(function(error) {
     console.error('Error al obtener acceso a la cámara y el micrófono:', error);
   });
+
+  ///******** */
+  import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+
+function Pregunta() {
+  const { preguntaId } = useParams();
+  const [respuesta, setRespuesta] = useState("");
+
+  useEffect(() => {
+    setRespuesta("");
+  }, [preguntaId]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // enviar respuesta
+  };
+
+  const handleChange = (e) => {
+    setRespuesta(e.target.value);
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="respuesta">Respuesta:</label>
+        <input
+          type="text"
+          id="respuesta"
+          value={respuesta}
+          onChange={handleChange}
+        />
+        <button type="submit">Enviar</button>
+      </form>
+    </div>
+  );
+}
+
+export default Pregunta;

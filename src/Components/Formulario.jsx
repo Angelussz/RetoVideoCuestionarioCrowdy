@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { getPregunta, preguntas } from "../data/preguntas";
-import { useLoaderData } from "react-router-dom";
+import { useLoaderData, useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 export const loader = ({ params }) => {
@@ -14,10 +14,16 @@ export const loader = ({ params }) => {
 const Formulario = () => {
   const [respuesta, setRespuesta] = useState("");
   const [responder, setResponder] = useState(false);
+  
   const [grabar, setGrabar] = useState(false);
   const pregunta = useLoaderData();
+  const refo= useParams(); // Referencia actual
+  console.log(refo.pregunta);
   const camara = useRef();
   const reproduccion = useRef();
+  
+  const siguiente =useRef();
+  const anterior = useRef();
 
   const recordedBlobs = useRef(null);
   const mediaRecorder = useRef(null);
@@ -75,6 +81,8 @@ const Formulario = () => {
       }
     }
   };
+  const [sgte,setSgte] = useState(linkDelante());
+  const [atras,setAtras] = useState(linkAtras());
   //Camara
 
   const constraints = {
@@ -100,8 +108,18 @@ const Formulario = () => {
   }, [grabar]);
   useEffect(() => {
     agregarRespuesta(preguntas,pregunta.numeroPregunta);
+    
+    setSgte(linkDelante())
+    setAtras(linkAtras())
+    
   }, [respuesta]);
-
+  
+  useEffect(() => {
+    stopCamera()
+    
+  }, [refo.pregunta])
+  
+  
   const playButton = () => {
     stopCamera();
     const mimeType = "video/webm";
@@ -113,6 +131,7 @@ const Formulario = () => {
     camara.current.src = pregunta.respuesta;
     camara.current.controls = true;
     camara.current.play();
+    
   };
   const recordButton = (e) => {
     setGrabar(!grabar);
@@ -163,6 +182,7 @@ const Formulario = () => {
       setRespuesta(window.URL.createObjectURL(superBuffer));
       console.log("Recorder stopped: ", event);
       console.log("Recorded Blobs: ", recordedBlobs);
+      
     };
     mediaRecorder.current.ondataavailable = handleDataAvailable;
     mediaRecorder.current.start();
@@ -212,11 +232,10 @@ const Formulario = () => {
   };
 
   //--termina video
-  console.log(respuesta);
-  if (!pregunta) {
-    return <div>No existe ese numero de pregunta</div>;
-  }
-
+  
+  // if (!pregunta) {
+  //   return <div>No existe ese numero de pregunta</div>;
+  // }
   return (
     <div>
       <h1>Pregunta {pregunta.numeroPregunta}</h1>
@@ -231,36 +250,22 @@ const Formulario = () => {
           {grabar ? "Parar Grabacion" : "Grabar"}{" "}
         </button>
       )}
-      <button onClick={playButton}>Play</button>
-      {/*  */}
-
-      <form>
-        <input
-          type="text"
-          onChange={(e) => {
-            setRespuesta(e.target.value);
-            if (e.target.value) pregunta.terminado = true;
-            else pregunta.terminado = false;
-          }}
-        />
-      </form>
-
+      {pregunta.respuesta?<button onClick={playButton}>Play</button>:""}
       <Link
-        to={`/preguntas/${linkAtras()}`}
-        onClick={() => {
-          agregarRespuesta(preguntas, pregunta.numeroPregunta);
-        }}
+        to={`/preguntas/${atras}`}
+        
       >
         Pregunta Anterior
       </Link>
       <Link
-        to={`/preguntas/${linkDelante()}`}
-        onClick={() => {
-          agregarRespuesta(preguntas, pregunta.numeroPregunta);
-        }}
+        to={`/preguntas/${sgte}`}
+        
+        
       >
         Siguiente Pregunta
       </Link>
+      <p>siguiente{sgte}</p>
+      <p>atras{atras}</p>
     </div>
   );
 };

@@ -5,6 +5,7 @@ import './App.css'
 import Pregunta from './Components/Pregunta'
 import { preguntas } from './data/preguntas'
 
+
 function App() {
   const [count, setCount] = useState(0)
   console.log(preguntas.every(pregunta => pregunta.terminado === true ));
@@ -15,6 +16,7 @@ function App() {
       {preguntas.every(pregunta=>pregunta.terminado === true) && <button onClick={()=>{
         console.log(preguntas);
       }}>Enviar</button>} 
+      
     </div>
   )
 }
