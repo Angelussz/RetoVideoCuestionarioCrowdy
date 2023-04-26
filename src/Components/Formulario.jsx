@@ -13,12 +13,11 @@ export const loader = ({ params }) => {
 
 const Formulario = () => {
   const [respuesta, setRespuesta] = useState("");
-  const [responder, setResponder] = useState(false);
+  
   const [cambioVista, setCambioVista] = useState(true);
   const [grabar, setGrabar] = useState(false);
   const pregunta = useLoaderData();
   const refo = useParams(); // Referencia actual
-  console.log(refo.pregunta);
   const camara = useRef();
   const reproduccion = useRef();
   const videoDeCamara = useRef();
@@ -36,7 +35,6 @@ const Formulario = () => {
       }
     });
   };
-  //?Debo terminar esta funcion
   const linkDelante = () => {
     const falta = preguntas.find((preg) => preg.terminado === false);
     const actual = preguntas.indexOf(pregunta);
@@ -112,15 +110,20 @@ const Formulario = () => {
   useEffect(() => {
     setCambioVista(true);
   }, [refo.pregunta]);
-
+  useEffect(()=>{
+    startCamera()
+    
+  },[])
+  
+  
   const playButton = () => {
     setCambioVista(false)
     const mimeType = "video/webm";
-    // const superBuffer = new Blob(recordedBlobs.current, { type: mimeType });
+
     camara.current.src = null;
     camara.current.srcObject = null;
 
-    // camara.current.src = window.URL.createObjectURL(superBuffer);
+    
     camara.current.src = pregunta.respuesta;
     camara.current.controls = true;
     camara.current.play();
@@ -128,15 +131,7 @@ const Formulario = () => {
   const recordButton = (e) => {
     setGrabar(!grabar);
     setCambioVista(true)
-    // if (responder === "Start Recording") {
-    //   startRecording();
-    // } else {
-    //   stopRecording();
-    //   recordButton.textContent = "Start Recording";
-    //   playButton.disabled = false;
-    // downloadButton.disabled = false;
-    // codecPreferences.disabled = false;
-    // }
+    
   };
   function handleDataAvailable(event) {
     console.log("handleDataAvailable", event);
@@ -200,7 +195,6 @@ const Formulario = () => {
       handleSuccess(stream);
     } catch (e) {
       console.error("navigator.getUserMedia error:", e);
-      errorMsgElement.innerHTML = `navigator.getUserMedia error:${e.toString()}`;
     }
   }
   const startCamera = async () => {
@@ -220,10 +214,11 @@ const Formulario = () => {
       // camara.current.srcObject = null;
     }
     // const mediaStream = camara.current.srcObject;
+    console.log();
   };
 
   //--termina video
-  startCamera();
+  // startCamera();
   // if (!pregunta) {
   //   return <div>No existe ese numero de pregunta</div>;
   // }
@@ -231,9 +226,7 @@ const Formulario = () => {
     <div>
       <h1>Pregunta {pregunta.numeroPregunta}</h1>
       <p>{pregunta.pregunta}</p>
-      <Link to={"/"} onClick={()=>{
-        stopCamera()
-      }}>Volver</Link>
+      <Link to={"/"} >Volver</Link>
       {/* !checar aca  */}
       {cambioVista?
       <video ref={camara} autoPlay playsInline></video>
